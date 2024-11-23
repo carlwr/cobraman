@@ -1,12 +1,12 @@
 # Generating Documentation For Your cobra.Command
 
-_forked from [https://www.github.com/rayjohnson/cobraman](rayjohnson/cobraman) through [https://www.github.com/PaddleHQ/cobraman](PaddleHQ/cobraman)_
+_forked from [rayjohnson/cobraman](https://www.github.com/rayjohnson/cobraman) through [PaddleHQ/cobraman](https://www.github.com/PaddleHQ/cobraman)_
 
 ---
 
 ![Image of Cobra Man](https://raw.githubusercontent.com/rayjohnson/cobraman/master/cobra-man.jpeg)
 
-This is a replacement for the man generator used by spf13/cobra.  The code in spf13/cobra/doc has different generators that hard-code what gets output for man pages, markdown, etc.  It
+This is a replacement for the man generator used by [spf13/cobra](https://www.github.com/spf13/cobra).  The code in spf13/cobra/doc has different generators that hard-code what gets output for man pages, markdown, etc.  It
 also calls a lot of other 3rd party libraries.  This package uses the Go template facility
 to generate documentation.  It is much more powerful and flexible thus giving a lot more
 control over the format and style of documentation you would like to generate.
