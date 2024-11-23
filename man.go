@@ -35,7 +35,7 @@ var ErrMissingCommandName = errors.New("you need a command name to have a man pa
 // Options is used configure how GenerateManPages will
 // do its job.
 type Options struct {
-	// What section to generate the pages 4 (1 is the default if not set)
+	// What section to generate the pages for (1 is the default if not set)
 	Section string
 
 	// CenterFooter used across all pages (defaults to current month and year)

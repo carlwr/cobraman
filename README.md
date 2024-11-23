@@ -1,8 +1,11 @@
-# Generating Documentation For Your cobra.Command
+
+[![Go Reference](https://pkg.go.dev/badge/github.com/carlwr/cobraman.svg)](https://pkg.go.dev/github.com/carlwr/cobraman)
 
 _forked from [rayjohnson/cobraman](https://www.github.com/rayjohnson/cobraman) through [PaddleHQ/cobraman](https://www.github.com/PaddleHQ/cobraman)_
 
 ---
+
+# Generating Documentation For Your cobra.Command
 
 ![Image of Cobra Man](https://raw.githubusercontent.com/rayjohnson/cobraman/master/cobra-man.jpeg)
 
