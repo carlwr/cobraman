@@ -1,4 +1,9 @@
 # Generating Documentation For Your cobra.Command
+
+_forked from [https://www.github.com/rayjohnson/cobraman](rayjohnson/cobraman) through [https://www.github.com/PaddleHQ/cobraman](PaddleHQ/cobraman)_
+
+---
+
 ![Image of Cobra Man](https://raw.githubusercontent.com/rayjohnson/cobraman/master/cobra-man.jpeg)
 
 This is a replacement for the man generator used by spf13/cobra.  The code in spf13/cobra/doc has different generators that hard-code what gets output for man pages, markdown, etc.  It
@@ -15,7 +20,7 @@ import (
 	"log"
 
 	"github.com/spf13/cobra"
-	"github.com/PaddleHQ/cobraman"
+	"github.com/carlwr/cobraman"
 )
 
 func main() {
@@ -27,7 +32,7 @@ func main() {
 		LeftFooter:  "Dofoo " + version,
 		Author:      "Foo Bar <foo@bar.com>",
 		Directory:   "/tmp",
-		Bugs:        `Bugs related to cobraman can be filed at https://github.com/PaddleHQ/cobraman`,
+		Bugs:        `Bugs related to cobraman can be filed at https://github.com/carlwr/cobraman`,
 	}
 	err := man.GenerateManPages(cmd.Root(), manOpts)
 	if err != nil {
@@ -38,7 +43,7 @@ func main() {
 
 That will get you a man page `/tmp/dofoo.1`
 
-GoDoc has the full API documentation [here](https://godoc.org/github.com/PaddleHQ/cobraman).  Be sure to checkout the documentation for CobraManOptions as it provides many options to control the output.
+GoDoc has the full API documentation [here](https://godoc.org/github.com/carlwr/cobraman).  Be sure to checkout the documentation for CobraManOptions as it provides many options to control the output.
 
 There is also an example directory with a simple dummy application that shows some of the features of this package.  See the [README](example/README.md).
 

@@ -4,8 +4,8 @@ package main
 import (
 	"os"
 
-	"github.com/PaddleHQ/cobraman"
-	"github.com/PaddleHQ/cobraman/example/cmd"
+	"github.com/carlwr/cobraman"
+	"github.com/carlwr/cobraman/example/cmd"
 )
 
 func main() {
@@ -18,8 +18,8 @@ func main() {
 	manOpts := &cobraman.Options{
 		LeftFooter:   "Example",
 		CenterHeader: "Example Manual",
-		Author:       "Ray Johnson <ray.johnson@gmail.com>",
-		Bugs:         `Bugs related to cobraman can be filed at https://github.com/PaddleHQ/cobraman `,
+		Author:       "Author Name <author@email.com>",
+		Bugs:         `Bugs related to cobraman can be filed at https://github.com/carlwr/cobraman `,
 	}
 	docGenerator.AddDocGenerator(manOpts, "mdoc")
 	docGenerator.AddDocGenerator(manOpts, "troff")

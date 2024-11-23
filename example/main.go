@@ -21,7 +21,7 @@
 // Package main creates example documentation
 package main
 
-import "github.com/PaddleHQ/cobraman/example/cmd"
+import "github.com/carlwr/cobraman/example/cmd"
 
 func main() {
 	cmd.Execute()

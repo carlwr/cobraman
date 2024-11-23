@@ -1,6 +1,6 @@
-module github.com/PaddleHQ/cobraman
+module github.com/carlwr/cobraman
 
-go 1.19
+go 1.23
 
 require (
 	github.com/mitchellh/go-homedir v1.1.0
