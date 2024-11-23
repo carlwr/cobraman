@@ -18,6 +18,7 @@ func init() {
 }
 
 // mdocManTemplate is a template what will use the mdoc macro package.
+// TODO: The Dt macro can take one additonal arg - what does it do?
 const mdocManTemplate = `.\" Man page for {{.CommandPath}}
 .Dd {{ .Date.Format "January 2006"}}
 {{ if .CenterHeader -}}
@@ -25,7 +26,6 @@ const mdocManTemplate = `.\" Man page for {{.CommandPath}}
 {{- else -}}
 .Dt {{.CommandPath | dashify | backslashify | upper}} {{ .Section }}
 {{- end }}
-./" TODO: The Dt macro can take one additonal arg - what does it do?
 .Sh NAME
 .Nm {{ .CommandPath | dashify | backslashify }}
 {{- if .ShortDescription }}
