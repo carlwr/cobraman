@@ -15,6 +15,7 @@ package cobraman
 
 import (
 	"bytes"
+	"os"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -57,6 +58,14 @@ func TestAddBashCompletionGenerator(t *testing.T) {
 	appCmd := &cobra.Command{}
 	dg := CreateDocGenCmdLineTool(appCmd)
 	dg.AddBashCompletionGenerator("foo.txt")
+}
+
+func checkForFile(t *testing.T, path string) {
+	if _, err := os.Stat(path); err == nil {
+		os.Remove(path) // dangerous
+		return
+	}
+	assert.Fail(t, "Expected file does not exist: "+path)
 }
 
 func TestExecute(t *testing.T) {
