@@ -21,11 +21,7 @@ func init() {
 // TODO: The Dt macro can take one additonal arg - what does it do?
 const mdocManTemplate = `.\" Man page for {{.CommandPath}}
 .Dd {{ .Date.Format "January 2006"}}
-{{ if .CenterHeader -}}
-.Dt {{.CommandPath | dashify | backslashify | upper}} \&{{ .Section }} "{{.CenterHeader}}" 
-{{- else -}}
 .Dt {{.CommandPath | dashify | backslashify | upper}} {{ .Section }}
-{{- end }}
 .Sh NAME
 .Nm {{ .CommandPath | dashify | backslashify }}
 {{- if .ShortDescription }}
@@ -47,7 +43,6 @@ const mdocManTemplate = `.\" Man page for {{.CommandPath}}
 {{- end }}
 .Ek
 .Sh DESCRIPTION
-.Nm
 {{ .Description | simpleToMdoc }}
 {{- if .AllFlags }}
 .Pp
@@ -87,7 +82,9 @@ Fl {{ print "-" .Name | backslashify }}
 .Sh SEE ALSO
 {{- range $index, $element := .SeeAlsos}}
 {{- if $index}} ,{{end}}
-.Xr {{$element.CmdPath}} {{$element.Section}}
+.Xr {{ .CmdPath | dashify | backslashify }} {{ .Section }}
 {{- end }}
 {{- end }}
 `
+
+// .Xr {{$element.CmdPath}} {{$element.Section}}
