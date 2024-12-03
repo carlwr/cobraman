@@ -1,0 +1,10 @@
+mkbin/
+	illustrating the use of pkg/mkbin/
+	see README.md
+
+mkbin/boodbye/
+	example project to use pkg/mkbin/ for
+	README.md provides commands for generating this project
+	(the generated dir is also checked-in, for convenience)
+
+
