@@ -185,8 +185,7 @@ func preserve(t *testing.T, dir string) {
 		toDir, err := filenamifyJoin(
 			testsCfg.preserve.dir,
 			testInvokedAt.Format("Mon_150405.0000"),
-			t.Name(),
-		)
+			t.Name())
 		if err != nil {
 			t.Logf("WARNING: failed to filenamify:\n  '%v'", err)
 			return
@@ -201,8 +200,7 @@ func preserve(t *testing.T, dir string) {
 	}
 }
 
-// Returns a temp dir for the test, automatically deleted when the test is complete. If the tests are configured to preserve
-// if test fails, the dir is preserved, and a message printed about where
+// Returns a temp dir, automatically deleted when the test is complete. Also, a cleanup function is registered for the test, providing the possibility of preserving the dir, as configured by the `preserve` functionality.
 func tempDir(t *testing.T) string {
 	tmpDir := t.TempDir()
 	t.Cleanup(func() { preserve(t, tmpDir) })
