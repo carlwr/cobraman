@@ -16,6 +16,7 @@ package cobraman
 import (
 	"bytes"
 	"fmt"
+	"html/template"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -23,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/carlwr/cobraman/internal/cobraman"
 	"github.com/flytam/filenamify"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
@@ -929,4 +931,39 @@ func TestBiggerExample(t *testing.T) {
 		}
 	})
 
+}
+
+func TestCustomerTemplate(t *testing.T) {
+	buf := new(bytes.Buffer)
+	cobraman.RegisterTemplate("good", "-", "txt", "Hello {{ \"world\" }} ")
+	cmd := &cobra.Command{Use: "foo"}
+	opts := Options{}
+	assert.NoError(t, GenerateOnePage(cmd, &opts, "good", buf))
+	assert.Regexp(t, "Hello world", buf.String())
+
+}
+
+func TestAddTemplateFunc(t *testing.T) {
+
+	hello := func(str string) string {
+		return "Hello " + str + "!"
+	}
+
+	cobraman.AddTemplateFunc("lower", strings.ToLower)
+
+	var templateFuncs = template.FuncMap{
+		"hello":  hello,
+		"repeat": strings.Repeat,
+	}
+
+	cobraman.AddTemplateFuncs(templateFuncs)
+
+	// Register template using these new functions
+	cobraman.RegisterTemplate("tester", "-", "txt", `{{ hello "World" | lower }} {{ repeat "x" 5 }}`)
+	cmd := &cobra.Command{Use: "foo"}
+	opts := Options{}
+	buf := new(bytes.Buffer)
+	assert.NoError(t, GenerateOnePage(cmd, &opts, "tester", buf))
+	assert.Regexp(t, "hello world!", buf.String())
+	assert.Regexp(t, "xxxxx", buf.String())
 }

@@ -11,11 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cobraman
+package mkbin
 
 import (
 	"path/filepath"
 
+	"github.com/carlwr/cobraman"
+	internal "github.com/carlwr/cobraman/internal/cobraman"
 	"github.com/spf13/cobra"
 )
 
@@ -34,7 +36,7 @@ func CreateDocGenCmdLineTool(appCmd *cobra.Command) *DocGenTool {
 	}
 
 	dg.docCmd = &cobra.Command{
-		Use:   "doc",
+		Use:   "docsgen",
 		Args:  cobra.NoArgs,
 		Short: "Generate documentation, etc.",
 	}
@@ -67,11 +69,12 @@ func (dg *DocGenTool) AddBashCompletionGenerator(fileName string) *DocGenTool {
 // It supports a --directory flag for where to place the generated files.  The
 // subcommand will be named generate-<templateName> where templateName is the
 // same as the template used to generate the documentation.
-func (dg *DocGenTool) AddDocGenerator(opts *Options, templateName string) *DocGenTool {
-	// Make sure template exists or we will later get runtime panic
-	_, ok := templateMap[templateName]
-	if !ok {
-		panic("the given template has not been registered: " + templateName)
+func (dg *DocGenTool) AddDocGenerator(opts *cobraman.Options, templateName string) *DocGenTool {
+
+	// should panic already in this function if  attempting to add a non-existing template:
+	_, _, t := internal.GetTemplate(templateName)
+	if t == nil {
+		panic("template could not be found: " + templateName)
 	}
 
 	genCmd := &cobra.Command{
@@ -79,7 +82,7 @@ func (dg *DocGenTool) AddDocGenerator(opts *Options, templateName string) *DocGe
 		Args:  cobra.NoArgs,
 		Short: "Generate docs with the " + templateName + " template",
 		RunE: func(myCmd *cobra.Command, args []string) error {
-			return GenerateDocs(dg.appCmd, opts, dg.installDirectory, templateName)
+			return cobraman.GenerateDocs(dg.appCmd, opts, dg.installDirectory, templateName)
 		},
 	}
 

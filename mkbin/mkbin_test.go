@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cobraman
+package mkbin
 
 import (
 	"bytes"
 	"os"
 	"testing"
 
+	"github.com/carlwr/cobraman"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
@@ -32,7 +33,7 @@ func TestAddDocGenerator(t *testing.T) {
 	appCmd := &cobra.Command{}
 	dg := CreateDocGenCmdLineTool(appCmd)
 
-	opts := &Options{}
+	opts := &cobraman.Options{}
 
 	// Template does not exist
 	assert.Panics(t, func() { dg.AddDocGenerator(opts, "foo") })
@@ -75,7 +76,7 @@ func TestExecute(t *testing.T) {
 	appCmd.AddCommand(cmd2, cmd3)
 
 	dg := CreateDocGenCmdLineTool(appCmd)
-	opts := &Options{}
+	opts := &cobraman.Options{}
 	dg.AddDocGenerator(opts, "mdoc")
 	dg.AddDocGenerator(opts, "markdown")
 	dg.AddBashCompletionGenerator("foo.txt")

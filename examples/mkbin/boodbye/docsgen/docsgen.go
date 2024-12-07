@@ -5,21 +5,23 @@ import (
 	"os"
 
 	"github.com/carlwr/cobraman"
-	"github.com/carlwr/cobraman/example/cmd"
+	"github.com/carlwr/cobraman/examples/mkbin/boodbye/cmd"
+	"github.com/carlwr/cobraman/mkbin"
+	// "github.com/carlwr/cobraman/example/cmd"
 )
 
 func main() {
 	// Get the root cobra command for the zap application
 	appCmds := cmd.GetRootCmd()
 
-	docGenerator := cobraman.CreateDocGenCmdLineTool(appCmds)
-	docGenerator.AddBashCompletionGenerator("zap.sh")
+	docGenerator := mkbin.CreateDocGenCmdLineTool(appCmds)
+	docGenerator.AddBashCompletionGenerator("bash-compl.sh")
 
 	manOpts := &cobraman.Options{
-		LeftFooter:   "Example",
-		CenterHeader: "Example Manual",
-		Author:       "Author Name <author@email.com>",
-		Bugs:         `Bugs related to cobraman can be filed at https://github.com/carlwr/cobraman `,
+		LeftFooter:   "boodbye",
+		CenterHeader: "boodbye",
+		Author:       "Bordon Bekko <gordon@bonds.banking.gov>",
+		Bugs:         `Bugs related to this tool can be filed at https://banking.gov/write.cgi?to=/dev/null`,
 	}
 	docGenerator.AddDocGenerator(manOpts, "mdoc")
 	docGenerator.AddDocGenerator(manOpts, "troff")

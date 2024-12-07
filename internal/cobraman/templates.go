@@ -66,7 +66,7 @@ func RegisterTemplate(name string, separator string, extension string, templateS
 	templateMap[name] = t
 }
 
-func getTemplate(name string) (sep string, ext string, tmpl *template.Template) {
+func GetTemplate(name string) (sep string, ext string, tmpl *template.Template) {
 	t := templateMap[name]
 	return t.separator, t.extension, t.template
 }

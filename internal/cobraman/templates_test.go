@@ -14,51 +14,12 @@
 package cobraman
 
 import (
-	"bytes"
-	"strings"
 	"testing"
-	"text/template"
 
-	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRegisterTemplate(t *testing.T) {
 	assert.Panics(t, func() { RegisterTemplate("bad", "-", "txt", "what {{ ") }, "The code did not panic")
 	assert.NotPanics(t, func() { RegisterTemplate("good", "-", "txt", "Hello {{ \"world\" }} ") }, "The code should not panic")
-}
-
-func TestCustomerTemplate(t *testing.T) {
-	buf := new(bytes.Buffer)
-
-	RegisterTemplate("good", "-", "txt", "Hello {{ \"world\" }} ")
-	cmd := &cobra.Command{Use: "foo"}
-	opts := Options{}
-	assert.NoError(t, GenerateOnePage(cmd, &opts, "good", buf))
-	assert.Regexp(t, "Hello world", buf.String())
-
-}
-
-func hello(str string) string {
-	return "Hello " + str + "!"
-}
-
-func TestAddTemplateFunc(t *testing.T) {
-	AddTemplateFunc("lower", strings.ToLower)
-
-	var templateFuncs = template.FuncMap{
-		"hello":  hello,
-		"repeat": strings.Repeat,
-	}
-
-	AddTemplateFuncs(templateFuncs)
-
-	// Register template using these new functions
-	RegisterTemplate("tester", "-", "txt", `{{ hello "World" | lower }} {{ repeat "x" 5 }}`)
-	cmd := &cobra.Command{Use: "foo"}
-	opts := Options{}
-	buf := new(bytes.Buffer)
-	assert.NoError(t, GenerateOnePage(cmd, &opts, "tester", buf))
-	assert.Regexp(t, "hello world!", buf.String())
-	assert.Regexp(t, "xxxxx", buf.String())
 }

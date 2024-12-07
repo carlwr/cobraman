@@ -1,9 +1,9 @@
 mkbin/
-	illustrating the use of pkg/mkbin/
+	illustrating the use of cobraman/mkbin/
 	see README.md
 
 mkbin/boodbye/
-	example project to use pkg/mkbin/ for
+	example project to use cobraman/mkbin/ for
 	README.md provides commands for generating this project
 	(the generated dir is also checked-in, for convenience)
 
