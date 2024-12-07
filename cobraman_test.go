@@ -25,7 +25,7 @@ import (
 	"time"
 
 	"github.com/carlwr/cobraman/internal/cobraman"
-	"github.com/flytam/filenamify"
+	"github.com/carlwr/cobraman/internal/tests"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -45,30 +45,6 @@ for testing test robustness:
 
 */
 
-type preserveTmpPolicy int
-
-const (
-	pFailing preserveTmpPolicy = iota
-	pAlways
-	pNever
-)
-
-type preserveTmpCfg struct {
-	policy preserveTmpPolicy
-	dir    string
-}
-
-type testsCfgT struct {
-	preserve preserveTmpCfg
-}
-
-var testsCfg = testsCfgT{
-	preserve: preserveTmpCfg{
-		policy: pFailing,
-		dir:    "/tmp/cobraman",
-	},
-}
-
 var testInvokedAt time.Time
 
 func TestMain(m *testing.M) {
@@ -76,136 +52,21 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-// Like `filepath.Join()`, but additionally filenamifies each individual path component.
-func filenamifyJoin(parts ...string) (string, error) {
-
-	opts := filenamify.Options{Replacement: "_"}
-
-	var fixeds []string
-	isAbs := filepath.IsAbs(parts[0])
-
-	for _, part := range parts {
-		partCl := filepath.Clean(part)
-		splitted := strings.Split(partCl, "/")
-		for _, elem := range splitted {
-			if elem == "" {
-				continue
-			}
-			fixed, err := filenamify.Filenamify(elem, opts)
-			if err != nil {
-				return "", err
-			}
-			fixeds = append(fixeds, fixed)
-		}
-	}
-
-	joined := filepath.Join(fixeds...)
-	if isAbs {
-		joined = string(filepath.Separator) + joined
-	}
-	return joined, nil
+type testsCfgT struct {
+	preserve tests.PreserveCfg
 }
 
-func TestFilenamifyJoin(t *testing.T) {
-	tcs := []struct {
-		args []string
-		want string
-	}{
-		{[]string{"a"},
-			"a"},
-		{[]string{"/a"},
-			"/a"},
-		{[]string{"/a/"},
-			"/a"},
-		{[]string{"/a/b/"},
-			"/a/b"},
-		{[]string{"a/b/"},
-			"a/b"},
-		{[]string{"a", "b"},
-			"a/b"},
-		{[]string{"//a/", "//b/"},
-			"/a/b"},
-		{[]string{"a b"},
-			"a b"},
-		{[]string{"a<b"},
-			"a_b"},
-		{[]string{"ab<cd"},
-			"ab_cd"},
-		{[]string{"<"},
-			"_"},
-		{[]string{"</b"},
-			"_/b"},
-		{[]string{"<", ">", "/</"},
-			"_/_/_"},
-
-		// peculiarities of filenamify:
-		// _removes_ non-path characters if leading or trailing:
-		{[]string{"<b"},
-			"b"},
-		{[]string{"b>"},
-			"b"},
-		{[]string{"/<b"},
-			"/b"},
-		{[]string{"a", "<b"},
-			"a/b"},
-		{[]string{"a", "/<b"},
-			"a/b"},
-		// replaces sequences of non-path characters with a single replacement character:
-		{[]string{"a<<b"},
-			"a_b"},
-		{[]string{"<<b"},
-			"b"},
-		{[]string{"/<<b"},
-			"/b"},
-		{[]string{"a", "<<b"},
-			"a/b"},
-		{[]string{"a", "/<<b"},
-			"a/b"},
-	}
-
-	for i, tc := range tcs {
-		t.Run(fmt.Sprint(i), func(t *testing.T) {
-			got, err := filenamifyJoin(tc.args...)
-			require.NoError(t, err)
-			assert.Equal(t, tc.want, got)
-			if t.Failed() {
-				t.Logf("arguments:\n\t%v", tc.args)
-			}
-		})
-	}
-}
-
-func preserve(t *testing.T, dir string) {
-
-	sinceAlways := (testsCfg.preserve.policy == pAlways)
-	sinceFailin := (testsCfg.preserve.policy == pFailing) && t.Failed()
-	doPreserve := sinceAlways || sinceFailin
-
-	if doPreserve {
-		var err error
-
-		toDir, err := filenamifyJoin(
-			testsCfg.preserve.dir,
-			testInvokedAt.Format("Mon_150405.0000"),
-			t.Name())
-		if err != nil {
-			t.Logf("WARNING: failed to filenamify:\n  '%v'", err)
-			return
-		}
-
-		err = os.CopyFS(toDir, os.DirFS(dir))
-		if err != nil {
-			t.Logf("WARNING: failed to preserve:\n  '%v'", err)
-			return
-		}
-		t.Logf("info: preserved temp dir:\n  %s", toDir)
-	}
+var testsCfg = testsCfgT{
+	preserve: tests.PreserveCfg{
+		Policy: tests.P_Failing,
+		Dir:    "/tmp/cobraman",
+	},
 }
 
 // Returns a temp dir, automatically deleted when the test is complete. Also, a cleanup function is registered for the test, providing the possibility of preserving the dir, as configured by the `preserve` functionality.
 func tempDir(t *testing.T) string {
 	tmpDir := t.TempDir()
-	t.Cleanup(func() { preserve(t, tmpDir) })
+	t.Cleanup(func() { tests.Preserve(t, tmpDir, testsCfg.preserve, testInvokedAt) })
 	return tmpDir
 }
 
