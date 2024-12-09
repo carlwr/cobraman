@@ -18,7 +18,7 @@ import (
 	"path/filepath"
 
 	"github.com/carlwr/cobraman"
-	internal "github.com/carlwr/cobraman/internal/cobraman"
+	"github.com/carlwr/cobraman/internal/templ"
 	"github.com/spf13/cobra"
 )
 
@@ -73,7 +73,7 @@ func (dg *DocGenTool) AddBashCompletionGenerator(fileName string) *DocGenTool {
 func (dg *DocGenTool) AddDocGenerator(opts *cobraman.Options, templateName string) *DocGenTool {
 
 	// should panic already in this function if  attempting to add a non-existing template:
-	_, _, t := internal.GetTemplate(templateName)
+	_, _, t := templ.GetTemplate(templateName)
 	if t == nil {
 		panic("template could not be found: " + templateName)
 	}

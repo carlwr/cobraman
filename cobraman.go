@@ -25,7 +25,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/carlwr/cobraman/internal/cobraman"
+	"github.com/carlwr/cobraman/internal/templ"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -136,7 +136,7 @@ func validate(opts *Options, templateName string) {
 		opts.Date = &now
 	}
 
-	sep, ext, t := cobraman.GetTemplate(templateName)
+	sep, ext, t := templ.GetTemplate(templateName)
 	if t == nil {
 		panic("template could not be found: " + templateName)
 	}
@@ -296,7 +296,7 @@ func GenerateOnePage(cmd *cobra.Command, opts *Options, templateName string, w i
 	values.CustomData = opts.CustomData
 
 	// Get template and generate the documentation page
-	_, _, t := cobraman.GetTemplate(templateName)
+	_, _, t := templ.GetTemplate(templateName)
 
 	err := t.Execute(w, values)
 	if err != nil {
