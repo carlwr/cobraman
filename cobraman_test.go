@@ -107,7 +107,29 @@ func expectedSec(opts Options) string {
 		return "1"
 	}
 	return opts.Section
+}
 
+func mkDate(s string) *time.Time {
+	t, _ := time.Parse(time.RFC3339, s)
+	return &t
+}
+
+type format int
+
+const (
+	troff format = iota
+	mdoc
+	md
+)
+
+var templName = map[format]string{
+	troff: "troff",
+	mdoc:  "mdoc",
+	md:    "markdown",
+}
+
+func (ss format) String() string {
+	return templName[ss]
 }
 
 type fmtCfg struct {
@@ -115,14 +137,14 @@ type fmtCfg struct {
 	subCmdSep string
 }
 
-var fmts = map[string]fmtCfg{
-	"troff": {
+var fmts = map[format]fmtCfg{
+	troff: {
 		ext:       ".%s",
 		subCmdSep: "-"},
-	"mdoc": {
+	mdoc: {
 		ext:       ".%s",
 		subCmdSep: "-"},
-	"markdown": {
+	md: {
 		ext:       ".md",
 		subCmdSep: "_"},
 }
@@ -140,25 +162,22 @@ func TestFileCreation(t *testing.T) {
 	}
 
 	for fmt, fmtCfg := range fmts {
-		fmt := fmt
-		fmtCfg := fmtCfg
 
-		t.Run(fmt, func(t *testing.T) {
+		t.Run(fmt.String(), func(t *testing.T) {
 
 			t.Run("no-cmd", func(t *testing.T) {
-				err := GenerateDocs(&cobra.Command{}, &Options{}, tempDir(t), fmt)
+				err := GenerateDocs(&cobra.Command{}, &Options{}, tempDir(t), fmt.String())
 				assert.Equal(t, "you need a command name to have a man page", err.Error())
 			})
 
 			for _, tcCmd := range tcCmds {
-				tcCmd := tcCmd
 				t.Run(tcCmd.cmd, func(t *testing.T) {
 					tmpD := tempDir(t)
 
 					// some shorthand functions:
 					genDocs := func(cobraCmd *cobra.Command) error {
 						optCopy := tcCmd.opt
-						return GenerateDocs(cobraCmd, &optCopy, tmpD, fmt)
+						return GenerateDocs(cobraCmd, &optCopy, tmpD, fmt.String())
 					}
 					expectedFname_ := func(cmd, subCmd string) string {
 						return expectedFname(tmpD, cmd, fmtCfg.subCmdSep, subCmd, fmtCfg.ext, expectedSec(tcCmd.opt))
@@ -215,29 +234,6 @@ func TestDefaultOpts(t *testing.T) {
 
 	opts = Options{}
 	assert.Panics(t, func() { validate(&opts, "no exist") }, "should have paniced")
-}
-
-func mkDate(s string) *time.Time {
-	t, _ := time.Parse(time.RFC3339, s)
-	return &t
-}
-
-type format int
-
-const (
-	troff format = iota
-	mdoc
-	md
-)
-
-var templName = map[format]string{
-	troff: "troff",
-	mdoc:  "mdoc",
-	md:    "markdown",
-}
-
-func (ss format) String() string {
-	return templName[ss]
 }
 
 type wantRegexes map[format]([]string)
@@ -308,8 +304,12 @@ func t_Run(t *testing.T, i int, cmd cobra.Command, opts Options, wants wantRegex
 				t.Run("docs_noError", func(t *testing.T) {
 					tmpD := tempDir(t)
 					assert.NoError(t, genDoc(cmd, opts, tmpD, format))
+					// TODO: add optional check on names of created files
 				})
 
+				if len(wantREs) == 0 {
+					return
+				}
 				t.Run("onePage_regexes", func(t *testing.T) {
 					buf, err := genPage(cmd, opts, format)
 					require.NoError(t, err)
