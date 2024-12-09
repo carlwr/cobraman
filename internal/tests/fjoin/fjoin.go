@@ -1,4 +1,4 @@
-package tests
+package fjoin
 
 import (
 	"path/filepath"
@@ -8,7 +8,7 @@ import (
 )
 
 // Like `filepath.Join()`, but additionally filenamifies each individual path component.
-func FilenamifyJoin(parts ...string) (string, error) {
+func Join(parts ...string) (string, error) {
 
 	opts := filenamify.Options{Replacement: "_"}
 

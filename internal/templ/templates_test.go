@@ -11,15 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package templ
+package templ_test
 
 import (
 	"testing"
 
+	"github.com/carlwr/cobraman/internal/templ"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRegisterTemplate(t *testing.T) {
-	assert.Panics(t, func() { RegisterTemplate("bad", "-", "txt", "what {{ ") }, "The code did not panic")
-	assert.NotPanics(t, func() { RegisterTemplate("good", "-", "txt", "Hello {{ \"world\" }} ") }, "The code should not panic")
+	assert.Panics(t, func() { templ.RegisterTemplate("bad", "-", "txt", "what {{ ") }, "The code did not panic")
+	assert.NotPanics(t, func() { templ.RegisterTemplate("good", "-", "txt", "Hello {{ \"world\" }} ") }, "The code should not panic")
 }

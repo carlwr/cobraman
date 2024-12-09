@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package templ
+package templ_test
 
 import (
 	"strconv"
 	"testing"
 
+	"github.com/carlwr/cobraman/internal/templ"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,7 +32,7 @@ func TestBackslashify(t *testing.T) {
 	}
 
 	for i := 0; i < len(cases); i++ {
-		str := backslashify(cases[i][0])
+		str := templ.Backslashify(cases[i][0])
 		expected := cases[i][1]
 		assert.Equal(t, expected, str)
 	}
@@ -45,7 +46,7 @@ func TestDashify(t *testing.T) {
 	}
 
 	for i := 0; i < len(cases); i++ {
-		str := dashify(cases[i][0])
+		str := templ.Dashify(cases[i][0])
 		expected := cases[i][1]
 		assert.Equal(t, expected, str)
 	}
@@ -59,7 +60,7 @@ func TestUnderscoreify(t *testing.T) {
 	}
 
 	for i := 0; i < len(cases); i++ {
-		str := underscoreify(cases[i][0])
+		str := templ.Underscoreify(cases[i][0])
 		expected := cases[i][1]
 		assert.Equal(t, expected, str)
 	}
@@ -75,7 +76,7 @@ func TestSimpleToTroff(t *testing.T) {
 	}
 
 	for i := 0; i < len(cases); i++ {
-		str := simpleToTroff(cases[i][0])
+		str := templ.SimpleToTroff(cases[i][0])
 		expected := cases[i][1]
 		assert.Equal(t, expected, str)
 	}
@@ -91,7 +92,7 @@ func TestSimpleToMdoc(t *testing.T) {
 	}
 
 	for i := 0; i < len(cases); i++ {
-		str := simpleToMdoc(cases[i][0])
+		str := templ.SimpleToMdoc(cases[i][0])
 		expected := cases[i][1]
 		assert.Equal(t, expected, str)
 	}
@@ -106,7 +107,7 @@ func TestRpad(t *testing.T) {
 
 	for i := 0; i < len(cases); i++ {
 		pad, _ := strconv.Atoi(cases[i][1])
-		str := rpad(cases[i][0], pad) + "x"
+		str := templ.PadR(cases[i][0], pad) + "x"
 		expected := cases[i][2]
 		assert.Equal(t, expected, str)
 	}
@@ -119,7 +120,7 @@ func TestTrimRightSpace(t *testing.T) {
 	}
 
 	for i := 0; i < len(cases); i++ {
-		str := trimRightSpace(cases[i][0]) + "x"
+		str := templ.TrimRightSpace(cases[i][0]) + "x"
 		expected := cases[i][1]
 		assert.Equal(t, expected, str)
 	}
@@ -132,7 +133,7 @@ func TestMakeline(t *testing.T) {
 	}
 
 	for i := 0; i < len(cases); i++ {
-		str := makeline(cases[i][0], cases[i][1][0])
+		str := templ.Makeline(cases[i][0], cases[i][1][0])
 		expected := cases[i][2]
 		assert.Equal(t, expected, str)
 	}

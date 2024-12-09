@@ -4,6 +4,8 @@ import (
 	"os"
 	"testing"
 	"time"
+
+	"github.com/carlwr/cobraman/internal/tests/fjoin"
 )
 
 type Policy int
@@ -28,7 +30,7 @@ func Preserve(t *testing.T, dir string, cfg PreserveCfg, invokedAt time.Time) {
 	if doPreserve {
 		var err error
 
-		toDir, err := FilenamifyJoin(
+		toDir, err := fjoin.Join(
 			cfg.Dir,
 			invokedAt.Format("Mon_150405.0000"),
 			t.Name())

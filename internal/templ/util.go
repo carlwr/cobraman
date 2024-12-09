@@ -22,7 +22,7 @@ import (
 
 var multiNewlineRegex = regexp.MustCompile(`\n+\n`)
 
-func simpleToMdoc(str string) string {
+func SimpleToMdoc(str string) string {
 	// Guessing this is already troff - so let it pass through
 	if len(str) > 1 && str[0] == '.' {
 		return str
@@ -30,10 +30,10 @@ func simpleToMdoc(str string) string {
 
 	// TODO: this could certainly be more sophisticated.  Pull requests welcome!
 	// Right now it is good enough for the most simple cases.
-	return backslashify(multiNewlineRegex.ReplaceAllString(str, "\n.Pp\n"))
+	return Backslashify(multiNewlineRegex.ReplaceAllString(str, "\n.Pp\n"))
 }
 
-func simpleToTroff(str string) string {
+func SimpleToTroff(str string) string {
 	// Guessing this is already troff - so let it pass through
 	if len(str) > 1 && str[0] == '.' {
 		return str
@@ -41,37 +41,37 @@ func simpleToTroff(str string) string {
 
 	// TODO: this could certainly be more sophisticated.  Pull requests welcome!
 	// Right now it is good enough for the most simple cases.
-	return backslashify(multiNewlineRegex.ReplaceAllString(str, "\n.PP\n"))
+	return Backslashify(multiNewlineRegex.ReplaceAllString(str, "\n.PP\n"))
 }
 
 var backslashReplacer *strings.Replacer
 
-func backslashify(str string) string {
+func Backslashify(str string) string {
 	if backslashReplacer == nil {
 		backslashReplacer = strings.NewReplacer("-", "\\-", "_", "\\_", "&", "\\&", "\\", "\\\\", "~", "\\~")
 	}
 	return backslashReplacer.Replace(str)
 }
 
-func dashify(str string) string {
+func Dashify(str string) string {
 	return strings.ReplaceAll(str, " ", "-")
 }
 
-func underscoreify(str string) string {
+func Underscoreify(str string) string {
 	return strings.ReplaceAll(str, " ", "_")
 }
 
-func trimRightSpace(s string) string {
+func TrimRightSpace(s string) string {
 	return strings.TrimRightFunc(s, unicode.IsSpace)
 }
 
-// rpad adds padding to the right of a string.
-func rpad(s string, padding int) string {
+// PadR adds padding to the right of a string.
+func PadR(s string, padding int) string {
 	template := fmt.Sprintf("%%-%ds", padding)
 	return fmt.Sprintf(template, s)
 }
 
-func makeline(str string, char byte) string {
+func Makeline(str string, char byte) string {
 	b := make([]byte, len(str))
 	for i := range b {
 		b[i] = char

@@ -28,15 +28,15 @@ var templateMap = make(map[string]manTemplate)
 
 var templateFuncs = template.FuncMap{
 	"upper":          strings.ToUpper,
-	"backslashify":   backslashify,
-	"dashify":        dashify,
-	"underscoreify":  underscoreify,
-	"simpleToTroff":  simpleToTroff,
-	"simpleToMdoc":   simpleToMdoc,
-	"makeline":       makeline,
+	"backslashify":   Backslashify,
+	"dashify":        Dashify,
+	"underscoreify":  Underscoreify,
+	"simpleToTroff":  SimpleToTroff,
+	"simpleToMdoc":   SimpleToMdoc,
+	"makeline":       Makeline,
 	"trim":           strings.TrimSpace,
-	"trimRightSpace": trimRightSpace,
-	"rpad":           rpad,
+	"trimRightSpace": TrimRightSpace,
+	"rpad":           PadR,
 }
 
 // AddTemplateFunc adds a template function that's available to doc templates.
