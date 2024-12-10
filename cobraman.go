@@ -127,72 +127,6 @@ func GenerateDocs(cmd *cobra.Command, opts *Options, directory string, templateN
 	return GenerateOnePage(cmd, opts, templateName, f)
 }
 
-func validate(opts *Options, templateName string) {
-	if opts.Section == "" {
-		opts.Section = "1"
-	}
-	if opts.Date == nil {
-		now := time.Now()
-		opts.Date = &now
-	}
-
-	sep, ext, t := templ.GetTemplate(templateName)
-	if t == nil {
-		panic("template could not be found: " + templateName)
-	}
-	opts.fileCmdSeparator = sep
-	opts.fileSuffix = ext
-	if ext == "use_section" {
-		opts.fileSuffix = opts.Section
-	}
-}
-
-type manStruct struct {
-	Date             *time.Time
-	Section          string
-	CenterFooter     string
-	LeftFooter       string
-	CenterHeader     string
-	UseLine          string
-	CommandPath      string
-	ShortDescription string
-	Description      string
-	NoArgs           bool
-
-	AllFlags          []manFlag
-	InheritedFlags    []manFlag
-	NonInheritedFlags []manFlag
-	SeeAlsos          []seeAlso
-	SubCommands       []*cobra.Command
-
-	Author      string
-	Environment string
-	Files       string
-	Bugs        string
-	Examples    string
-
-	CobraCmd *cobra.Command
-
-	CustomData map[string]interface{}
-}
-
-type manFlag struct {
-	Shorthand   string
-	Name        string
-	NoOptDefVal string
-	DefValue    string
-	Usage       string
-	ArgHint     string
-}
-
-type seeAlso struct {
-	CmdPath   string
-	Section   string
-	IsParent  bool
-	IsChild   bool
-	IsSibling bool
-}
-
 // GenerateOnePage will generate one documentation page and output the result to w
 // TODO: document use of this function in README.
 //
@@ -303,6 +237,72 @@ func GenerateOnePage(cmd *cobra.Command, opts *Options, templateName string, w i
 		return err
 	}
 	return nil
+}
+
+func validate(opts *Options, templateName string) {
+	if opts.Section == "" {
+		opts.Section = "1"
+	}
+	if opts.Date == nil {
+		now := time.Now()
+		opts.Date = &now
+	}
+
+	sep, ext, t := templ.GetTemplate(templateName)
+	if t == nil {
+		panic("template could not be found: " + templateName)
+	}
+	opts.fileCmdSeparator = sep
+	opts.fileSuffix = ext
+	if ext == "use_section" {
+		opts.fileSuffix = opts.Section
+	}
+}
+
+type manStruct struct {
+	Date             *time.Time
+	Section          string
+	CenterFooter     string
+	LeftFooter       string
+	CenterHeader     string
+	UseLine          string
+	CommandPath      string
+	ShortDescription string
+	Description      string
+	NoArgs           bool
+
+	AllFlags          []manFlag
+	InheritedFlags    []manFlag
+	NonInheritedFlags []manFlag
+	SeeAlsos          []seeAlso
+	SubCommands       []*cobra.Command
+
+	Author      string
+	Environment string
+	Files       string
+	Bugs        string
+	Examples    string
+
+	CobraCmd *cobra.Command
+
+	CustomData map[string]interface{}
+}
+
+type manFlag struct {
+	Shorthand   string
+	Name        string
+	NoOptDefVal string
+	DefValue    string
+	Usage       string
+	ArgHint     string
+}
+
+type seeAlso struct {
+	CmdPath   string
+	Section   string
+	IsParent  bool
+	IsChild   bool
+	IsSibling bool
 }
 
 func genFlagArray(flags *pflag.FlagSet) []manFlag {
