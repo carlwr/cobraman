@@ -115,6 +115,7 @@ func mkDate(s string) *time.Time {
 	return &t
 }
 
+// The file format for generated documentation.
 type format int
 
 const (
