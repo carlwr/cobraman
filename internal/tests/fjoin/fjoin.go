@@ -7,15 +7,22 @@ import (
 	"github.com/flytam/filenamify"
 )
 
-// Like `filepath.Join()`, but additionally filenamifies each individual path component.
+// Joins any number of path elements into a single path, separating them with an OS specific [Separator]. Each path element additionally undergoes filenamification before they are joined.
+//
+// In other words: like `filepath.Join()` but with each element filenameified.
+//
+// Empty elements are ignored. The result is `filepath.Clean`ed.
 func Join(parts ...string) (string, error) {
 
 	opts := filenamify.Options{Replacement: "_"}
 
-	var fixeds []string
+	var namified []string
 	isAbs := filepath.IsAbs(parts[0])
 
 	for _, part := range parts {
+		if part == "" {
+			continue
+		}
 		partCl := filepath.Clean(part)
 		splitted := strings.Split(partCl, "/")
 		for _, elem := range splitted {
@@ -26,11 +33,11 @@ func Join(parts ...string) (string, error) {
 			if err != nil {
 				return "", err
 			}
-			fixeds = append(fixeds, fixed)
+			namified = append(namified, fixed)
 		}
 	}
 
-	joined := filepath.Join(fixeds...)
+	joined := filepath.Join(namified...)
 	if isAbs {
 		joined = string(filepath.Separator) + joined
 	}
