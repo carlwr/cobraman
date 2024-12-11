@@ -143,3 +143,9 @@ tree --prune -P '*-bin'
   # └── main-bin*
 
 ```
+
+---
+
+# Notes
+
+The example application is named "boodbye" in tribute to the earlier misspelling introduced in [ee194c2](https://github.com/rayjohnson/cobraman/blob/ee194c2025975261ec1ba172d2f68fabca6a819d/example/cmd/boodbye.go).
