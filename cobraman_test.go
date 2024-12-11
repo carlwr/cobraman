@@ -64,13 +64,6 @@ var testsCfg = testsCfgT{
 	},
 }
 
-// Returns a temp dir, automatically deleted when the test is complete. Also, a cleanup function is registered for the test, providing the possibility of preserving the dir, as configured by the `preserve` functionality.
-// func tempDir_old(t *testing.T) string {
-// 	tmpDir := t.TempDir()
-// 	t.Cleanup(func() { tests.Preserve(t, tmpDir, testsCfg.preserve, "" /* testInvokedAt */) })
-// 	return tmpDir
-// }
-
 var tempDir = tests.TempDirFunc(testsCfg.preserve, &testInvokedAt)
 
 type runFunc func(*cobra.Command, []string)
