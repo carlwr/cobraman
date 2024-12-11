@@ -26,7 +26,7 @@ import (
 
 	"github.com/carlwr/cobraman"
 	"github.com/carlwr/cobraman/internal/templ"
-	"github.com/carlwr/cobraman/internal/tests"
+	"github.com/carlwr/cobraman/internal/tests/tempdir"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -54,17 +54,17 @@ func TestMain(m *testing.M) {
 }
 
 type testsCfgT struct {
-	preserve tests.PreserveCfg
+	preserve tempdir.PreserveCfg
 }
 
 var testsCfg = testsCfgT{
-	preserve: tests.PreserveCfg{
-		Policy: tests.P_Failing,
+	preserve: tempdir.PreserveCfg{
+		Policy: tempdir.P_Failing,
 		Dir:    "/tmp/cobraman",
 	},
 }
 
-var tempDir = tests.TempDirFunc(testsCfg.preserve, &testInvokedAt)
+var tempDir = tempdir.TempDirFunc(testsCfg.preserve, &testInvokedAt)
 
 type runFunc func(*cobra.Command, []string)
 

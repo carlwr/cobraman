@@ -1,4 +1,4 @@
-package tests
+package tempdir
 
 import (
 	"os"
@@ -27,7 +27,7 @@ func TempDirWith(t *testing.T, cfg PreserveCfg, testInvokedAt *time.Time) string
 	if testInvokedAt != nil {
 		invokedAtStr = (*testInvokedAt).Format("Mon_150405.0000")
 	}
-	t.Cleanup(func() { Preserve(t, tmpDir, cfg, invokedAtStr) })
+	t.Cleanup(func() { preserve(t, tmpDir, cfg, invokedAtStr) })
 
 	return tmpDir
 }
@@ -52,8 +52,8 @@ type PreserveCfg struct {
 	Dir    string
 }
 
-// func Preserve(t *testing.T, dir string, cfg PreserveCfg, invokedAt time.Time) {
-func Preserve(t *testing.T, dir string, cfg PreserveCfg, prefix string) {
+// func preserve(t *testing.T, dir string, cfg PreserveCfg, invokedAt time.Time) {
+func preserve(t *testing.T, dir string, cfg PreserveCfg, prefix string) {
 
 	sinceAlways := (cfg.Policy == P_Always)
 	sinceFailin := (cfg.Policy == P_Failing) && t.Failed()
