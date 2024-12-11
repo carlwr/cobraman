@@ -91,9 +91,22 @@ type Options struct {
 	CustomData map[string]interface{}
 }
 
-// GenerateDocs - build man pages for the passed in cobra.Command
+// Build man pages for the provided cobra.Command
 // and all of its children.
-func GenerateDocs(cmd *cobra.Command, opts *Options, directory string, templateName string) (err error) {
+func GenerateDocs(cmd *cobra.Command, opts *Options, directory string, templateName string) error {
+	_, err := GenerateDocsF(cmd, opts, directory, templateName)
+	return err
+}
+
+// Additionally returns the path of the _main_ documentation file that was generated. In addition to this file, documentation files for the children of the provided cobra.Command may have been generated.
+//
+// The returned path is relative if the provided directory is relative.
+//
+// If an error occured, the returned path may be the empty string. It is never the empty string if the returned error value is nil.
+func GenerateDocsF(cmd *cobra.Command, opts *Options, directory string, templateName string) (string, error) {
+
+	var err error
+
 	// Set defaults
 	validate(opts, templateName)
 	if directory == "" {
@@ -105,26 +118,28 @@ func GenerateDocs(cmd *cobra.Command, opts *Options, directory string, templateN
 			continue
 		}
 		if err := GenerateDocs(c, opts, directory, templateName); err != nil {
-			return err
+			return "", err
 		}
 	}
 
 	// Generate file name and open the file
 	basename := strings.ReplaceAll(cmd.CommandPath(), " ", opts.fileCmdSeparator)
 	if basename == "" {
-		return ErrMissingCommandName
+		return "", ErrMissingCommandName
 	}
 	filename := filepath.Join(directory, basename+"."+opts.fileSuffix)
 	f, err := os.Create(filename) //nolint:gosec // the file is constructed safely
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer func() {
 		err = f.Close()
 	}()
 
 	// Generate the documentation
-	return GenerateOnePage(cmd, opts, templateName, f)
+	err = GenerateOnePage(cmd, opts, templateName, f)
+
+	return filename, err
 }
 
 // GenerateOnePage will generate one documentation page and output the result to w
