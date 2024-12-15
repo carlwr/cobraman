@@ -1,3 +1,4 @@
+// Provide temporary directories for tests that use the `testing` package.
 package tempdir
 
 import (
@@ -10,7 +11,7 @@ import (
 
 // Returns a temporary directory for the test to use.
 //
-// If the cfg parameter specifies the _never_ policy, this function only calls [`(testing.T).TempDir`](https://pkg.go.dev/testing#T.TempDir), and is hence equivalent to that function.
+// If the cfg parameter specifies the _never_ policy, this function only calls [testing.T.TempDir], and is hence equivalent to that function.
 //
 // If the cfg parameter specifies the _always_ policy, this function additionally registers a cleanup function that copies the temporary directory to a permanent location, preserving it. The _failing_ policy is similar, but only preserves the directory if the test has failed.
 //
@@ -32,6 +33,20 @@ func TempDirWith(t *testing.T, cfg PreserveCfg, testInvokedAt *time.Time) string
 	return tmpDir
 }
 
+// Returns a function with cfg and testInvokedAt fixed to the provided values. The returned function has signuatre `func(t *testing.T) string`.
+//
+// Intended for creating a convenience function, with `*testing.T` as its only parameter, to be used in the test functions.
+//
+// Example:
+//
+//	// Create the funtion once per file/package:
+//	var tempDir = tempdir.TempDirFunc(preservecfg, &testInvokedAt)
+//
+//	// use in test functions:
+//	func TestFilewriter(t *testing.T) {
+//		 tmpD := tempDir(t)
+//		 // [...]
+//	}
 func TempDirFunc(cfg PreserveCfg, testInvokedAt *time.Time) func(t *testing.T) string {
 	fun := func(t *testing.T) string {
 		return TempDirWith(t, cfg, testInvokedAt)
@@ -49,10 +64,9 @@ const (
 
 type PreserveCfg struct {
 	Policy Policy
-	Dir    string
+	Dir    string // dir to preserve into (absolute or relative)
 }
 
-// func preserve(t *testing.T, dir string, cfg PreserveCfg, invokedAt time.Time) {
 func preserve(t *testing.T, dir string, cfg PreserveCfg, prefix string) {
 
 	sinceAlways := (cfg.Policy == P_Always)
