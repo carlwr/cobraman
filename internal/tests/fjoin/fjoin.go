@@ -13,7 +13,6 @@ import (
 //
 // Empty elements are ignored. The result is `filepath.Clean`ed.
 func Join(parts ...string) (string, error) {
-
 	opts := filenamify.Options{Replacement: "_"}
 
 	var namified []string

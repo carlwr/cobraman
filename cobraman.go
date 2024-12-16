@@ -104,7 +104,6 @@ func GenerateDocs(cmd *cobra.Command, opts *Options, directory string, templateN
 //
 // If an error occured, the returned path may be the empty string. It is never the empty string if the returned error value is nil.
 func GenerateDocsF(cmd *cobra.Command, opts *Options, directory string, templateName string) (string, error) {
-
 	var err error
 
 	// Set defaults

@@ -71,7 +71,6 @@ func (dg *DocGenTool) AddBashCompletionGenerator(fileName string) *DocGenTool {
 // subcommand will be named generate-<templateName> where templateName is the
 // same as the template used to generate the documentation.
 func (dg *DocGenTool) AddDocGenerator(opts *cobraman.Options, templateName string) *DocGenTool {
-
 	// should panic already in this function if  attempting to add a non-existing template:
 	_, _, t := templ.GetTemplate(templateName)
 	if t == nil {

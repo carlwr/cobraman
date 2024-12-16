@@ -137,17 +137,19 @@ type fmtCfg struct {
 var fmts = map[format]fmtCfg{
 	troff: {
 		ext:       ".%s",
-		subCmdSep: "-"},
+		subCmdSep: "-",
+	},
 	mdoc: {
 		ext:       ".%s",
-		subCmdSep: "-"},
+		subCmdSep: "-",
+	},
 	md: {
 		ext:       ".md",
-		subCmdSep: "_"},
+		subCmdSep: "_",
+	},
 }
 
 func TestFileCreation(t *testing.T) {
-
 	tcCmds := []struct {
 		cmd string
 		opt cobraman.Options
@@ -159,9 +161,7 @@ func TestFileCreation(t *testing.T) {
 	}
 
 	for fmt, fmtCfg := range fmts {
-
 		t.Run(fmt.String(), func(t *testing.T) {
-
 			t.Run("no-cmd", func(t *testing.T) {
 				err := cobraman.GenerateDocs(&cobra.Command{}, &cobraman.Options{}, tempDir(t), fmt.String())
 				assert.Equal(t, "you need a command name to have a man page", err.Error())
@@ -199,19 +199,16 @@ func TestFileCreation(t *testing.T) {
 					}
 				})
 			}
-
 		})
-
 	}
 }
 
 type wantRegexes map[format]([]string)
 
 func TestOptions_New(t *testing.T) {
-
 	cmd := cobra.Command{Use: "foo"}
 
-	var tcs = []struct {
+	tcs := []struct {
 		opt  cobraman.Options
 		want wantRegexes
 	}{
@@ -219,12 +216,14 @@ func TestOptions_New(t *testing.T) {
 			opt: cobraman.Options{},
 			want: wantRegexes{
 				troff: {`\.TH "FOO" "1"`},
-				mdoc:  {`\.Dt FOO 1`}},
+				mdoc:  {`\.Dt FOO 1`},
+			},
 		}, {
 			opt: cobraman.Options{Section: "3"},
 			want: wantRegexes{
 				troff: {`\.TH "FOO" "3"`},
-				mdoc:  {`\.Dt FOO 3`}},
+				mdoc:  {`\.Dt FOO 3`},
+			},
 		}, {
 			opt: cobraman.Options{
 				LeftFooter:   "left footer",
@@ -265,11 +264,9 @@ func genPage(cmd cobra.Command, opts cobraman.Options, formt format) (buf *bytes
 }
 
 func t_Run(t *testing.T, i int, cmd cobra.Command, opts cobraman.Options, wants wantRegexes) {
-
 	t.Run(fmt.Sprint(i), func(t *testing.T) {
 		for format, wantREs := range wants {
 			t.Run(format.String(), func(t *testing.T) {
-
 				t.Run("docs_noError", func(t *testing.T) {
 					tmpD := tempDir(t)
 					assert.NoError(t, genDoc(cmd, opts, tmpD, format))
@@ -287,7 +284,6 @@ func t_Run(t *testing.T, i int, cmd cobra.Command, opts cobraman.Options, wants 
 							assert.Regexp(t, wantRE, buf.String())
 						})
 					}
-
 				})
 			})
 		}
@@ -479,7 +475,6 @@ func TestMisc(t *testing.T) {
 }
 
 func TestSec_required(t *testing.T) {
-
 	cmd := &cobra.Command{Use: "foo"}
 	cmd_shrt := &cobra.Command{Use: "bar", Short: "going to"}
 
@@ -505,9 +500,7 @@ func TestSec_required(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.fmt, func(t *testing.T) {
-
 			t.Run("header", func(t *testing.T) {
-
 				buf := new(bytes.Buffer)
 				opts := cobraman.Options{}
 				assert.NoError(t, cobraman.GenerateOnePage(cmd, &opts, tc.fmt, buf))
@@ -518,7 +511,8 @@ func TestSec_required(t *testing.T) {
 					LeftFooter:   "kitty kat",
 					CenterHeader: "Hello",
 					CenterFooter: "meow",
-					Section:      "3"}
+					Section:      "3",
+				}
 				assert.NoError(t, cobraman.GenerateOnePage(cmd, &opts, tc.fmt, buf))
 				assert.Regexp(t, fmt.Sprintf(tc.header, "FOO", "3", "meow", "kitty kat", "Hello"), buf.String())
 
@@ -531,7 +525,6 @@ func TestSec_required(t *testing.T) {
 				}
 				assert.NoError(t, cobraman.GenerateOnePage(cmd, &opts, tc.fmt, buf))
 				assert.Regexp(t, fmt.Sprintf(tc.header, "FOO", "1", "Jun 1968", "", ""), buf.String())
-
 			})
 
 			t.Run("sec-name", func(t *testing.T) {
@@ -546,7 +539,6 @@ func TestSec_required(t *testing.T) {
 			})
 
 			t.Run("sec-synopsis", func(t *testing.T) {
-
 				t.Run("shrt", func(t *testing.T) {
 					buf := new(bytes.Buffer)
 					opts := cobraman.Options{}
@@ -554,9 +546,7 @@ func TestSec_required(t *testing.T) {
 					// Test Synopsis
 					assert.Regexp(t, fmt.Sprintf(tc.sec_synopsis, "bar"), buf.String())
 				})
-
 			})
-
 		})
 	}
 }
@@ -712,10 +702,8 @@ func TestBiggerExample(t *testing.T) {
 
 				// TODO test hidden flag does not exist in bob-foo-cat.1
 				// TODO: test annotation exists
-
 			})
 		}
-
 	})
 
 	t.Run("see-also_cmd", func(t *testing.T) {
@@ -744,7 +732,6 @@ func TestBiggerExample(t *testing.T) {
 			},
 		} {
 			t.Run(tc.fmt, func(t *testing.T) {
-
 				tmpDir := tempDir(t)
 
 				t.Run("genDocs-noerror", func(t *testing.T) {
@@ -760,7 +747,6 @@ func TestBiggerExample(t *testing.T) {
 			})
 		}
 	})
-
 }
 
 func TestCustomerTemplate(t *testing.T) {
@@ -770,18 +756,16 @@ func TestCustomerTemplate(t *testing.T) {
 	opts := cobraman.Options{}
 	assert.NoError(t, cobraman.GenerateOnePage(cmd, &opts, "good", buf))
 	assert.Regexp(t, "Hello world", buf.String())
-
 }
 
 func TestAddTemplateFunc(t *testing.T) {
-
 	hello := func(str string) string {
 		return "Hello " + str + "!"
 	}
 
 	templ.AddTemplateFunc("lower", strings.ToLower)
 
-	var templateFuncs = template.FuncMap{
+	templateFuncs := template.FuncMap{
 		"hello":  hello,
 		"repeat": strings.Repeat,
 	}

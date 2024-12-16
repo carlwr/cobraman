@@ -17,7 +17,6 @@ import (
 //
 // The `testInvokedAt` parameter can be provided as a pointer to a `time.Time` value to specify the time at which the test run was initiated. This is then used as part of the name of the preserved directory path, by which preserved directories will be sorted under one subdirectory per test run. If `nil` is provided, it will be ignored.
 func TempDirWith(t *testing.T, cfg PreserveCfg, testInvokedAt *time.Time) string {
-
 	tmpDir := t.TempDir()
 
 	if cfg.Policy == P_Never {
@@ -68,7 +67,6 @@ type PreserveCfg struct {
 }
 
 func preserve(t *testing.T, dir string, cfg PreserveCfg, prefix string) {
-
 	sinceAlways := (cfg.Policy == P_Always)
 	sinceFailin := (cfg.Policy == P_Failing) && t.Failed()
 	doPreserve := sinceAlways || sinceFailin
