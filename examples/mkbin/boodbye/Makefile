@@ -1,27 +1,35 @@
 MAKEFLAGS     := --no-builtin-rules         \
-								 --warn-undefined-variables \
-								 --no-print-directory
+                 --warn-undefined-variables \
+                 --no-print-directory
 
-cobra       := cobra-cli --config /dev/null
+
+# ------------------
+
 module-path := github.com/carlwr/cobraman
 go-version  := 1.23
 
 
 # ------------------
 
-all-srcs :=  \
-	cmd/rootCmd.go     \
-	cmd/boodbye.go     \
-	cmd/hello.go       \
-	main.go            \
-	docsgen/docsgen.go \
-	| go.mod
+t := .aux
 
-bins :=  \
-	main-bin  \
-	docsgen/docsgen-bin
+buildable-go :=   \
+	cmd/root.go     \
+	cmd/boodbye.go  \
+	cmd/hello.go    \
+	main.go
 
-all     : $(all-srcs) tidy
+main-bin    := main-bin
+docsgen-bin := docsgen/docsgen-bin
+
+bins :=     \
+	$(main-bin)   \
+	$(docsgen-bin)
+
+
+# ------------------
+
+all     : $(buildable-go) tidy
 binaries: $(bins)
 .PHONY  : all binaries
 
@@ -30,102 +38,178 @@ binaries: $(bins)
 
 # ------------------
 
-go.mod:
-	> $@ \
-	  $(print-gomod)
-	@echo
-
-.PHONY:\
-tidy
-tidy: main.go cmd/rootCmd.go | go.mod
-	go mod tidy
-	@echo
-
-cmd/rootCmd.go main.go &: | go.mod
-	$(cobra) init
-	> cmd/rootCmd.go  \
-	  cat cmd/root.go
-	>>cmd/rootCmd.go  \
-	  $(print-GetRootCmd)
-	rm cmd/root.go
-	@[ -e LICENSE ] && rm LICENSE
-	@echo
-
-cmd/hello.go   \
-cmd/boodbye.go:\
-cmd/%.go      : | main.go cmd/rootCmd.go
-	$(cobra) add $(*F)
-	@echo
-
-$(bins): $(all-srcs) tidy
+$(bins): $(buildable-go) tidy
 
 $(bins):\
 %-bin  : %.go
 	go build -o $@ $<
 	@echo
 
-# notes:
-#
-# * whenever `go.mod` is a prereq, it is only ever an _order-only prereq_
-#   * i.e. `[..] : [..] | go.mod`
-#   * since: go.mod is updated _in-place_ (spuriously by`cobra-cli` invocations, and when we invoke `go mod tidy`)
-#
-# * go.sum will be created by some of the commands, and it is sometimes updated in-place; there is no need to have `make` track this/the state of the file, hence `go.sum` is not included in the rules
+$(buildable-go): \
+%.go           : $t/%.unfmt
+	$(mkdir)
+	$(gofmt) $<  >$@
+	@echo
 
+%.unfmt: %.unappended %.append
+	cat $^  >$@
+	@echo
 
-# ------------------
+$t/main.unfmt $t/cmd/root.unappended &: | go.mod
+	@mkdir -p $t/cmd
+	cobra-cli init  $t
+	  @# must use path argument, wrong import path if cd-ing
+	mv $t/cmd/root.go  $t/cmd/root.unappended
+	mv $t/main.go      $t/main.unfmt
+	@rm -rf $t/LICENSE
+	@echo
 
-print-gomod := \
-  printf '%s\n' \
-    'module $(module-path)/examples/mkbin/boodbye'  \
-    'go $(go-version)'  \
-    'replace $(module-path) v0.0.0 => ../../..'  \
-    'require $(module-path) v0.0.0'
+$t/cmd/hello.unfmt    \
+$t/cmd/boodbye.unfmt: \
+$t/cmd/%.unfmt      : | go.mod
+	$(mkdir)
+	$(cobra) add $(*F)
+	mv $t/cmd/$(*F).go  $t/cmd/$(*F).unfmt
+	@echo
 
-print-GetRootCmd := \
-  printf '%s\n' \
-    '// Added for use by cobraman/mkbin.'  \
-    'func GetRootCmd() *cobra.Command {'   \
-     $$'\treturn rootCmd'  \
-    '}'
+go.mod:
+	>$@ echo
+	go mod edit \
+	  -module   $(module-path)/examples/mkbin/boodbye \
+	  -go       1.23 \
+	  -replace  $(module-path)@v0.0.0=../../.. \
+	  -require  $(module-path)@v0.0.0
+	@echo
 
+%/root.append:
+	$(mkdir)
+	>$@ printf '%s\n' \
+	      '// Added for use by cobraman/mkbin.'  \
+	      'func GetRootCmd() *cobra.Command { return rootCmd }'
+	@echo
 
+.PHONY: \
+tidy
+tidy: main.go cmd/root.go | go.mod
+	go mod tidy
+	@echo
 
-# ------------------
+define __
+
+  notes
+	-----
+
+  whenever `go.mod` is a prereq, it is only ever an _order-only prereq_
+    * i.e. `[..] : [..] | go.mod`
+    * since: go.mod is updated _in-place_ _spuriously_ by `cobra-cli` invocations, and when we invoke `go mod tidy`
+    * -> it's timestamps won't align with the actions of this Makefile
+    * -> care about this files existance, but not about its timestamp
+  
+	go.sum is ignored by this Makefile
+    * since: it will not only be created by some of the commands, but is also sometimes updated in-place
+    * -> its timestamps, and possibly its existance, won't align well with the actions of this Makefile
+    * further, there is no need to have `make` track neither the existance nor the timestamps of this file
+
+endef
+
 
 .PHONY:\
 clean
-clean: clean-bin    \
-			 clean-cobra  \
-			 clean-go.mod
+clean: clean-binaries clean-aux
+	rm -rf cmd/ main.go LICENSE
+	rm -f  go.mod go.sum
 	@echo
 
-PHONY:\
-clean-go.mod
-clean-go.mod:
-	rm -f go.mod go.sum
-
 .PHONY:\
-clean-cobra
-clean-cobra:
-	rm -rf cmd
-	rm -f main.go
-
-.PHONY:\
-clean-bin
-clean-bin:
+clean-binaries
+clean-binaries:
 	rm -rf $(bins)
 
+.PHONY:\
+clean-aux
+clean-aux:
+	rm -rf $t
 
 
-# ------------------
+# --------------------------- tools --------------------------- #
+
+mkdir = @mkdir -p $(@D)
+
+# have-cobra != command -v cobra-cli >/dev/null && echo 1
+have-cobra := $(shell command -v cobra-cli >/dev/null && echo 1)
+#have-gofmt != command -v gofmt     >/dev/null && echo 1
+have-gofmt := $(shell command -v gofmt     >/dev/null && echo 1)
+
+# $(warning hc  _$(have-cobra).)
+# $(warning hc2 _$(have-cobra2).)
+# 
+# ifeq 'a' 'b'
+#   $(error a b)
+# else
+#   $(warning OK)
+# endif
+
+
+ifeq '$(have-cobra)' '1'
+  cobra := cd $t && cobra-cli
+else
+  # $(warning 2 _$(have-cobra).)
+  $(error need cobra-cli: `go install github.com/spf13/cobra-cli@latest`)
+endif
+
+# clean:
+# 	echo all:$(have-cobra).
+
+ifeq '$(have-gofmt)' '1'
+  gofmt := gofmt
+else
+  gofmt := cat `\# (cat - poor-man's gofmt)`
+endif
+
+
+# ---------------- some implementation details ---------------- #
+
+.NOTINTERMEDIATE:
+.DELETE_ON_ERROR:
+
+self := $(lastword $(MAKEFILE_LIST))
+  # this makefile's filename
+
+$(self):: ;
+  # don't rebuild the makefile itself
+
+
+# ------------------------ repo-restore ----------------------- #
+
+dir-entries-actual  = $(filter-out . .. .vscode,$(wildcard * .* */*))
+dir-entries-want    = $(self) docsgen docsgen/docsgen.go
+
+dir-entries-missing = $(filter-out $(dir-entries-actual),$(dir-entries-want))
+dir-entries-extra		= $(filter-out $(dir-entries-want)  ,$(dir-entries-actual))
+
+repo-restore: clean
+	@echo $@: checking cleaned state...
+	@[ -z '$(dir-entries-missing)' ] || { echo 'FAIL: files missing'; exit 1; }
+	@[ -z '$(dir-entries-extra)'   ] || { echo 'FAIL: extra files'  ; exit 1; }
+	@echo ...cleaned state OK. Files:
+	tree -F --noreport
+	@echo
+	@echo $@: building...
+	$(MAKE) all >/dev/null
+	@echo
+	@echo ...building DONE.; echo
+	$(MAKE) clean-aux
+	@echo
+
+
+# ------------------------- self-tests ------------------------ #
 
 all-tests := \
-  self-test_makeall         \
-	self-test_all-x2          \
-  self-test_no-rerun-init-1 \
-	self-test_no-rerun-init-2 \
-  self-test_tidy
+  self-test_makeall       \
+	self-test_shuffle       \
+  self-test_no-rerun-init \
+  self-test_tidy          \
+	self-lint
 
 .PHONY:\
 self-test
@@ -133,57 +217,81 @@ self-test:
 	@: \
 	$(foreach test,$(all-tests),\
 	  $(shell \
-		  >&2 printf '%-30s' $(test); \
-		  $(MAKE) $(test) >/dev/null && >&2 echo OK || { >&2 echo FAIL; exit 1; }; \
-		 ) \
+	    >&2 printf '%-30s' $(test); \
+	    $(MAKE) $(test) >/dev/null && >&2 echo OK || { >&2 echo FAIL; exit 1; }; \
+	   ) \
 	 )
 	$(MAKE) clean all >/dev/null
     # after tests, leave dir with sources created 
 
 define assert_oneCobraInit
-  ggrep -c 'cobra-cli .* init' \
+  ggrep -c -P 'cobra-cli\b.*\binit' \
   | { read n; \
       [ $$n != 1 ] && { echo FAIL: $$n cobra init, expected 1; exit 1; }; \
       echo OK; }
 endef
 
 define assert_binsExecution
-  [ "$$(./main-bin boodbye)" = 'boodbye called' ]
-  ./docsgen/docsgen-bin --help >/dev/null
+  @ ./$(main-bin)    --help >/dev/null
+	@ ./$(docsgen-bin) --help >/dev/null
+  @ [ "$$(./$(main-bin) boodbye)" = 'boodbye called' ]
 endef
+
+define check_gofumpt
+	if ! command -v gofumpt >/dev/null; then \
+	  echo Warning: no gofumpt; \
+	else \
+	  diff=$$(gofumpt -d .); \
+	  if [ -n "$$diff" ]; then \
+	    echo Warning: non-empty gofumpt diff; \
+	    printf 'first line:\n"%s"\n' "$$(<<< "$$diff" head -n1)"; \
+	  else \
+	    echo OK: no gofumpt diff; \
+	    typeset -p diff; \
+	  fi; \
+	fi # >&2
+endef
+
+can-shuffle := $(shell $(MAKE) --help | ggrep -q -- '--shuffle' && echo 1)
 
 .PHONY:\
 self-test_makeall
 self-test_makeall:
-	$(MAKE) clean all
-	$(MAKE) clean binaries
+	$(MAKE) clean all      >/dev/null
+	$(check_gofumpt)
+	$(MAKE) clean binaries >/dev/null
 	$(assert_binsExecution)
 	$(MAKE) clean
 	@echo 'OK'
 	@echo
 
 .PHONY:\
-self-test_all-x2
-self-test_all-x2:
-	$(MAKE) clean all
-	$(MAKE) all
-	[   -e cmd/rootCmd.go ] || { >&2 echo FAIL: no rootCmd.go ; exit 1; }
-	[ ! -e cmd/root.go    ] || { >&2 echo FAIL: root.go exists; exit 1; }
-	@echo OK
+self-test_shuffle
+ifeq '$(can-shuffle)' '1'
+self-test_shuffle:
+	$(MAKE) --shuffle=1 clean all >/dev/null
+	$(MAKE) --shuffle=2 clean all >/dev/null
+	$(MAKE) --shuffle=3 clean all >/dev/null
+	$(MAKE) --shuffle=4 clean all >/dev/null
+	@echo 'OK'
 	@echo
+else
+self-test_shuffle:
+	@printf '(`make --shuffle` not supported, skipping) ' >&2
+	@echo
+endif
 
 .PHONY:\
-self-test_no-rerun-init-1
-self-test_no-rerun-init-1:
-	$(MAKE) clean cmd/boodbye.go cmd/hello.go \
+self-test_no-rerun-init
+self-test_no-rerun-init:
+	# one make invocation:
+	$(MAKE) clean main.go cmd/hello.go \
 	| $(assert_oneCobraInit)
 	$(MAKE) clean
-
-.PHONY:\
-self-test_no-rerun-init-2
-self-test_no-rerun-init-2:
-	{ $(MAKE) clean cmd/boodbye.go; $(MAKE) cmd/hello.go; } \
+	# separate make invocations:
+	{ $(MAKE) clean main.go; $(MAKE) cmd/hello.go; } \
 	| $(assert_oneCobraInit)
+	# done:
 	$(MAKE) clean
 
 .PHONY:\
@@ -191,8 +299,19 @@ self-test_tidy
 self-test_tidy:
 	$(MAKE) clean binaries
 	rm go.sum cmd/hello.go
-	$(MAKE) main-bin && echo 'OK' || { echo 'FAILED'; exit 1; }
+	$(MAKE) $(main-bin) && echo 'OK' || { echo 'FAILED'; exit 1; }
 	$(MAKE) clean
 	@echo
 
+.PHONY:\
+self-lint
+self-lint: grep-tt-lines = ggrep -P --line-number $1 '^\t\t' $(self)
+self-lint:
+	@if $(call grep-tt-lines,--silent); then \
+	    echo $@: FAILED, lines:;   \
+	    $(call grep-tt-lines,) | cat -t; \
+	    exit 1; \
+	fi
+	@echo 'OK'
+	@echo
 

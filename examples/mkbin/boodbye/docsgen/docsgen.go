@@ -1,4 +1,4 @@
-// Package main generates the documentation for the example application
+// Companion util example
 package main
 
 import (
@@ -7,11 +7,9 @@ import (
 	"github.com/carlwr/cobraman"
 	"github.com/carlwr/cobraman/examples/mkbin/boodbye/cmd"
 	"github.com/carlwr/cobraman/mkbin"
-	// "github.com/carlwr/cobraman/example/cmd"
 )
 
 func main() {
-	// Get the root cobra command for the zap application
 	appCmds := cmd.GetRootCmd()
 
 	docGenerator := mkbin.CreateDocGenCmdLineTool(appCmds)
@@ -21,7 +19,7 @@ func main() {
 		LeftFooter:   "boodbye",
 		CenterHeader: "boodbye",
 		Author:       "Bordon Bekko <gordon@bonds.banking.gov>",
-		Bugs:         `Bugs related to this tool can be filed at https://banking.gov/write.cgi?to=/dev/null`,
+		Bugs:         `Bugs related to this tool can be filed at https://banking.gov/form?action=write.cgi&to=localfile&fname=/dev/null`,
 	}
 	docGenerator.AddDocGenerator(manOpts, "mdoc")
 	docGenerator.AddDocGenerator(manOpts, "troff")
